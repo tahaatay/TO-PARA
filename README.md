@@ -5,7 +5,7 @@ A simple arcade-style 2D game made with Python and Pygame.
 Control the slime with **W, A, S, D**, collect money to increase your score, and avoid negative money obstacles. As your score increases, the game becomes faster and more challenging.
 
 ### Features
-
+   V1.0
 *  Collect money to increase your score
 *  Avoid negative money obstacles
 *  Increasing difficulty
@@ -14,6 +14,8 @@ Control the slime with **W, A, S, D**, collect money to increase your score, and
 *  Sound effects and background music
 *  Restart system
 *  Simple keyboard controls
+*  
+*  V1.1
 *  Added high score tracking
 *  Added music and sound effect toggles
 *  Improved obstacle boundary handling
