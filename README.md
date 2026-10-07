@@ -15,7 +15,7 @@ Control the slime with **W, A, S, D**, collect money to increase your score, and
 *  Restart system
 *  Simple keyboard controls
 *  
-*  V1.1
+   V1.1
 *  Added high score tracking
 *  Added music and sound effect toggles
 *  Improved obstacle boundary handling
