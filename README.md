@@ -14,14 +14,14 @@ Control the slime with **W, A, S, D**, collect money to increase your score, and
 *  Sound effects and background music
 *  Restart system
 *  Simple keyboard controls
-*  
+  
    V1.1
 *  Added high score tracking
 *  Added music and sound effect toggles
 *  Improved obstacle boundary handling
 *  Fixed several gameplay bugs
 *  Improved overall gameplay smoothness
-*  
+  
 # TO'PARA v1.2 — Gameplay Update
 
 ## Added
