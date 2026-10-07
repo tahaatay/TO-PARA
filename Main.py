@@ -8,23 +8,27 @@ yukseklik = 600
 pencere = pg.display.set_mode((genislik, yukseklik))
 
 # degiskenler
+can=3
 _ = 0
 l = 0
-z = 0
 v = 0
 ieksi=0
+Kombo=0
+Efekt=0
+music=0
 oyun_durumu="Menu"
 duraklatildi = False  # Pause durumu için bayrak
 muzik=True
 efekt=True
 # ayar çekme
 Hiz = 10
-FPS = 60
+FPS = 75
 saat = pg.time.Clock()
 
 # ses
 eks = pg.Sound("eksi.mp3")
 par = pg.Sound("para.mp3")
+heal = pg.Sound("Heal.mp3")
 game = pg.Sound("gameover.mp3")
 game_over = pg.Sound("gameoverrr.mp3")
 pg.mixer.music.load("arka_ses.mp3")
@@ -62,6 +66,12 @@ slime_buyuk_kordi = slime_buyuk.get_rect()
 slime = slime_kucuk
 slime_kordinat = slime.get_rect()
 slime_kordinat.topleft = (200, 200)
+#Kalpler
+
+kalp = pg.image.load("kalp.png")
+donkalp=pg.image.load("don.png")
+donkalp_kordinat = donkalp.get_rect()
+don_aktif=False
 
 # eksi parayı ayarlama
 eksi_hiz_x = 5
@@ -137,7 +147,6 @@ while durum:
 
     if tus[pg.K_d] and slime_kordinat.x < genislik - slime.get_width():
         slime_kordinat.x += Hiz
-
     # eksi para hareket
     eksi_para_kordinat.x += eksi_hiz_x
     eksi_para_kordinat.y += eksi_hiz_y
@@ -154,6 +163,12 @@ while durum:
     if eksi_para_kordinat.bottom >= yukseklik:
         eksi_para_kordinat.bottom=yukseklik
         eksi_hiz_y *= -1
+
+    #Dondurma kalp
+    if not don_aktif and can<=4 and random.randint(1,1000)==1:
+        donkalp_kordinat.x=random.randint(30,genislik-30)
+        donkalp_kordinat.y=random.randint(30,yukseklik-30)
+        don_aktif=True
     # ikinci eksi para hareket
     ieksi_para_kordinat.x += ieksi_hiz_x
     ieksi_para_kordinat.y += ieksi_hiz_y
@@ -172,58 +187,80 @@ while durum:
         ieksi_hiz_y *= -1
 
     # slime ve paraların etkileşimleri
+    if don_aktif:
+        pencere.blit(donkalp,donkalp_kordinat)
+        if slime_kordinat.colliderect(donkalp_kordinat):
+          can+=1
+          if efekt:
+             heal.play()
+          don_aktif=False
+
     if slime_kordinat.colliderect(para_kordinat):
         para_kordinat.x = random.randint(0, genislik - para.get_width())
         para_kordinat.y = random.randint(3, yukseklik - para.get_height())
-        para_Sayisi = para_Sayisi + 1
+        Kombo+=1
+        if 2>=Kombo>=1:
+          para_Sayisi +=1
+        if 4>=Kombo>2:
+          para_Sayisi +=2
+        if 6>=Kombo>4:
+          para_Sayisi +=3
+        if 8>=Kombo>6:
+          para_Sayisi +=4
+        if Kombo>8:
+          para_Sayisi +=5
+
         if efekt:
-         par.play()
+          par.play()
 
     if slime_kordinat.colliderect(eksi_para_kordinat):
         eksi_para_kordinat.x = random.randint(0, genislik - eksi_para.get_width())
         eksi_para_kordinat.y = random.randint(3, yukseklik - eksi_para.get_height())
         para_Sayisi = para_Sayisi - 1
+        Kombo=0
         if efekt:
          eks.play()
-        z += 1
+        can-=1
 
     if ieksi==1 and slime_kordinat.colliderect(ieksi_para_kordinat):
         ieksi_para_kordinat.x=random.randint(0, genislik - ieksi_para.get_width())
         ieksi_para_kordinat.y=random.randint(3, yukseklik - ieksi_para.get_height())
         para_Sayisi = para_Sayisi - 1
-        pg.mixer.Sound.play(eks)
-        z +=1
+        Kombo=0
+        if efekt:
+         eks.play()
+        can-=1
 
     # yazı
     skor_yazisi = font.render(str(f"Skor: {para_Sayisi}"), True, (0, 255, 0))
-    hata_yazisi = font.render(str(f"Hata: {z}"), True, (26, 255, 0))
-
+    kombo_yazisi=font.render(str(f"Kombo: {Kombo}"), True, (0, 255, 0))
     # slimein büyüyüp küçülmesi
     if 40 > para_Sayisi >= 30:
         if v == 0:
-            eksi_hiz_y = 17
-            eksi_hiz_x = 17
-            ieksi_hiz_y = 17
-            ieksi_hiz_x = 17
+            Hiz=5
+            eksi_hiz_y = 10
+            eksi_hiz_x = 10
+            ieksi_hiz_y = 10
+            ieksi_hiz_x = 10
             v = 1
     if 30 > para_Sayisi >= 20:
         slime = slime_buyuk
         if v == 1:
-            eksi_hiz_y = 13
-            eksi_hiz_x = 13
-            ieksi_hiz_y = 13
-            ieksi_hiz_x = 13
+            eksi_hiz_y = 7
+            eksi_hiz_x = 7
+            ieksi_hiz_y = 7
+            ieksi_hiz_x = 7
             v = 0
         if _ == 0:
             slime_buyuk_kordi.x = slime_orta_kordi.x
             slime_buyuk_kordi.y = slime_orta_kordi.y
             slime_kordinat = slime_buyuk_kordi
             _ = +1
-            Hiz = 9
-            eksi_hiz_y = 13
-            eksi_hiz_x = 13
-            ieksi_hiz_y = 13
-            ieksi_hiz_x = 13
+            Hiz = 6
+            eksi_hiz_y = 7
+            eksi_hiz_x = 7
+            ieksi_hiz_y = 7
+            ieksi_hiz_x = 7
     if 20 > para_Sayisi >= 10:
         slime = slime_orta
         slime_kordinat = slime_orta_kordi
@@ -233,21 +270,21 @@ while durum:
             slime_orta_kordi.y = slime_buyuk_kordi.y
             _ = 0
             slime_kordinat = slime_orta_kordi
-            Hiz=13
-            eksi_hiz_y = 10
-            eksi_hiz_x = 10
-            ieksi_hiz_y = 10
-            ieksi_hiz_x = 10
+            Hiz=4
+            eksi_hiz_y = 5
+            eksi_hiz_x = 5
+            ieksi_hiz_y = 5
+            ieksi_hiz_x = 5
         if l >= 1 and para_Sayisi >= 10:
             slime_orta_kordi.x = slime_kucuk_kordinat.x
             slime_orta_kordi.y = slime_kucuk_kordinat.y
             l = 0
             slime_kordinat = slime_orta_kordi
-            Hiz=13
-            eksi_hiz_y = 10
-            eksi_hiz_x = 10
-            ieksi_hiz_y = 10
-            ieksi_hiz_x = 10
+            Hiz=4
+            eksi_hiz_y = 5
+            eksi_hiz_x = 5
+            ieksi_hiz_y = 5
+            ieksi_hiz_x = 5
     if para_Sayisi < 10:
         slime = slime_kucuk
         slime_kordinat = slime_kucuk_kordinat
@@ -256,12 +293,12 @@ while durum:
             slime_kucuk_kordinat.y = slime_orta_kordi.y
             l = +1
             slime_kordinat = slime_kucuk_kordinat
-            Hiz = 15
-            eksi_hiz_y = 10
-            eksi_hiz_x = 10
+            Hiz = 3
+            eksi_hiz_y = 3
+            eksi_hiz_x = 3
 
     # bitiş ekranı
-    if para_Sayisi < 0 or z >= 10:
+    if para_Sayisi < 0 or can==0:
         if muzik:
             game_over.play(-1)
         if efekt:
@@ -269,10 +306,12 @@ while durum:
 
         with open ("skor.txt","r") as file:
             for line in file:
-                high = int(line)
+              high = int(line)
+            high=int(high)
+            birinci=high
             if para_Sayisi>high:
-              with open("skor.txt","w") as f:
-               f.write(str(para_Sayisi))
+                with open("skor.txt","w") as f:
+                 f.write(str(para_Sayisi))
 
 
 
@@ -280,14 +319,28 @@ while durum:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     durum = False
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_m:
+                        muzik = not muzik
+                        if muzik and music==0:
+                            game_over.play(-1)
+                            music=1
+                        elif muzik and music==1:
+                            game_over.stop()
+                            music=0
+                    if event.key == pg.K_n:
+                        efekt = not efekt
+                        if efekt and Efekt==0:
+                            game.play()
+                            Efekt=1
             pg.mixer.music.stop()
             pencere.fill((0, 0, 0))
             skor = font.render(f"Oyun bitti! Skorun:{para_Sayisi}", True, (0, 255, 0))
             yeniden = font.render("yeniden denemek için 'R' tuşuna basman gerekicek", True, (0, 255, 0))
-            if para_Sayisi<=high:
+            if para_Sayisi<=birinci:
               highscore = font.render(f"Skoru geçemedin en yüksek skor: {high}", True, (255, 255, 255))
               pencere.blit(highscore, (60, 60))
-            elif para_Sayisi>high:
+            elif para_Sayisi>birinci:
               breakscore=font.render(f"**Skoru geçtin:{para_Sayisi}**", True, (255, 255, 255))
               pencere.blit(breakscore, (60, 60))
               high=para_Sayisi
@@ -295,17 +348,19 @@ while durum:
             pencere.blit(yeniden, (175, 250))
             pg.display.flip()
             saat.tick(FPS)
-
-            tus = pg.key.get_pressed()
+            tus=pg.key.get_pressed()
             if tus[pg.K_r]:
                 para_Sayisi = 0
                 game_over.stop()
                 pg.mixer.music.play(-1)
                 _ = 0
                 l = 0
-                z = 0
+                can=3
                 v = 0
                 ieksi=0
+                Efekt=0
+                music=0
+                don_aktif=False
                 slime_kordinat.center=(300,270)
                 slime_kucuk_kordinat.center=(300,270)
                 slime_orta_kordi.center=(300,270)
@@ -313,9 +368,10 @@ while durum:
                 break
 
     # yenilemeler ekran
-
-    pencere.blit(hata_yazisi, (10, 10))
+    for i in range(can):
+        pencere.blit(kalp, (10+i*20,10))
     pencere.blit(skor_yazisi, (345, 10))
+    pencere.blit(kombo_yazisi, (600, 10))
     pencere.blit(slime, slime_kordinat)
     pencere.blit(para, para_kordinat)
     pencere.blit(eksi_para, eksi_para_kordinat)
