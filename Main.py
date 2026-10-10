@@ -1,11 +1,14 @@
 import pygame as pg
 import random
-
 # paket birleştirme ve pencere ayarlama
 pg.init()
 genislik = 750
 yukseklik = 600
 pencere = pg.display.set_mode((genislik, yukseklik))
+
+#Hile Cheat
+Gecmis=[]
+hile_kod=[pg.K_w, pg.K_w, pg.K_s, pg.K_s, pg.K_a, pg.K_d, pg.K_a, pg.K_d]
 
 # degiskenler
 can=3
@@ -16,12 +19,18 @@ ieksi=0
 Kombo=0
 Efekt=0
 music=0
+ceat=True
 oyun_durumu="Menu"
 duraklatildi = False  # Pause durumu için bayrak
 muzik=True
 efekt=True
+
+#ucan efektler
+ucan_yazilar=[]
+
 # ayar çekme
-Hiz = 10
+taban_hiz=3
+Hiz = 3
 FPS = 75
 saat = pg.time.Clock()
 
@@ -39,6 +48,9 @@ para = pg.image.load("para.png")
 para_kordinat = para.get_rect()
 para_kordinat.topleft = (350, 250)
 
+buyuk_para=pg.image.load("iyipara.png")
+buyuk_para_kordinat = buyuk_para.get_rect()
+buyuk_para_aktif=False
 # eksi para
 eksi_para = pg.image.load("para engel.png")
 eksi_para_kordinat = eksi_para.get_rect()
@@ -69,10 +81,18 @@ slime_kordinat.topleft = (200, 200)
 #Kalpler
 
 kalp = pg.image.load("kalp.png")
+#etki edenler büyü vb.
+#ekstra kalp
 donkalp=pg.image.load("don.png")
 donkalp_kordinat = donkalp.get_rect()
 don_aktif=False
-
+#İksir
+iksir=pg.image.load("iksir.png")
+iksir_kordinat = iksir.get_rect()
+iskir=False
+hizlanma=False
+iksir_bitis_zamani=0
+Suresi=20000
 # eksi parayı ayarlama
 eksi_hiz_x = 5
 eksi_hiz_y = 5
@@ -86,7 +106,7 @@ while durum:
             durum = False
         elif event.type == pg.KEYDOWN:
             # P veya ESC tuşuna basınca duraklatma durumunu değiştirir
-            if event.key == pg.K_p or event.key == pg.K_ESCAPE:
+            if event.key ==event.key == pg.K_ESCAPE:
                 duraklatildi = not duraklatildi
                 if duraklatildi:
                     pg.mixer.music.pause()
@@ -100,6 +120,15 @@ while durum:
                     pg.mixer.music.play(-1)
             if event.key==pg.K_n:
                 efekt=not efekt
+            Gecmis.append(event.key)
+            if len(Gecmis)>8:
+                Gecmis.pop(0)
+            if Gecmis==hile_kod:
+                ceat=not ceat
+                can=9
+                Gecmis=[]
+
+
     while oyun_durumu=="Menu" and durum:
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -117,7 +146,7 @@ while durum:
         pg.display.flip()
         saat.tick(FPS)
 
-    if ieksi==0 and para_Sayisi>20:
+    if ieksi==0 and para_Sayisi>19:
         ieksi=1
 
     # Oyun duraklatıldıysa karesel döngüyü dondurup pause yazısını basar
@@ -133,7 +162,10 @@ while durum:
         continue  # Oyun mekaniklerini çalıştırmayıp başa döner
 
     pencere.fill((0, 0, 0))
-
+    if hizlanma:
+        su_anki_zaman = pg.time.get_ticks()
+        if su_anki_zaman >= iksir_bitis_zamani:
+            hizlanma = False
     # hangi tuşla oynanması gerektiği
     tus = pg.key.get_pressed()
     if tus[pg.K_w] and slime_kordinat.y > 0:
@@ -161,14 +193,25 @@ while durum:
        eksi_para_kordinat.top=0
        eksi_hiz_y*= -1
     if eksi_para_kordinat.bottom >= yukseklik:
-        eksi_para_kordinat.bottom=yukseklik
-        eksi_hiz_y *= -1
+       eksi_para_kordinat.bottom=yukseklik
+       eksi_hiz_y *= -1
 
     #Dondurma kalp
-    if not don_aktif and can<=4 and random.randint(1,1000)==1:
+    if not don_aktif and can<=4 and random.randint(1,1000)==1 and ceat:
         donkalp_kordinat.x=random.randint(30,genislik-30)
         donkalp_kordinat.y=random.randint(30,yukseklik-30)
         don_aktif=True
+    #5li paranın çıkışı
+    if buyuk_para_aktif==False and random.randint(1,1000)==19:
+        buyuk_para_aktif=True
+        buyuk_para_kordinat.x=random.randint(30,genislik-30)
+        buyuk_para_kordinat.y=random.randint(30,yukseklik-30)
+    #iksir
+    if iskir==False and hizlanma==False and random.randint(1,1000)==1:
+        iskir=True
+        iksir_kordinat.x=random.randint(30,genislik-30)
+        iksir_kordinat.y=random.randint(30,yukseklik-30)
+
     # ikinci eksi para hareket
     ieksi_para_kordinat.x += ieksi_hiz_x
     ieksi_para_kordinat.y += ieksi_hiz_y
@@ -195,25 +238,40 @@ while durum:
              heal.play()
           don_aktif=False
 
+    if buyuk_para_aktif:
+        pencere.blit(buyuk_para,buyuk_para_kordinat)
+        if slime_kordinat.colliderect(buyuk_para_kordinat):
+            para_Sayisi +=5
+            Kombo+=1
+            if efekt:
+                par.play()
+            buyuk_para_aktif=False
+    if iskir:
+        pencere.blit(iksir,iksir_kordinat)
+        if slime_kordinat.colliderect(iksir_kordinat):
+            hizlanma=True
+            iskir=False
+            iksir_bitis_zamani=pg.time.get_ticks()+Suresi
+
     if slime_kordinat.colliderect(para_kordinat):
         para_kordinat.x = random.randint(0, genislik - para.get_width())
         para_kordinat.y = random.randint(3, yukseklik - para.get_height())
         Kombo+=1
-        if 2>=Kombo>=1:
+        if 6>=Kombo>=1:
           para_Sayisi +=1
-        if 4>=Kombo>2:
+        if 13>=Kombo>6:
           para_Sayisi +=2
-        if 6>=Kombo>4:
+        if 15>=Kombo>13:
           para_Sayisi +=3
-        if 8>=Kombo>6:
+        if 20>=Kombo>15:
           para_Sayisi +=4
-        if Kombo>8:
+        if Kombo>20:
           para_Sayisi +=5
 
         if efekt:
           par.play()
 
-    if slime_kordinat.colliderect(eksi_para_kordinat):
+    if slime_kordinat.colliderect(eksi_para_kordinat) and ceat:
         eksi_para_kordinat.x = random.randint(0, genislik - eksi_para.get_width())
         eksi_para_kordinat.y = random.randint(3, yukseklik - eksi_para.get_height())
         para_Sayisi = para_Sayisi - 1
@@ -222,7 +280,7 @@ while durum:
          eks.play()
         can-=1
 
-    if ieksi==1 and slime_kordinat.colliderect(ieksi_para_kordinat):
+    if ieksi==1 and slime_kordinat.colliderect(ieksi_para_kordinat) and ceat:
         ieksi_para_kordinat.x=random.randint(0, genislik - ieksi_para.get_width())
         ieksi_para_kordinat.y=random.randint(3, yukseklik - ieksi_para.get_height())
         para_Sayisi = para_Sayisi - 1
@@ -237,40 +295,42 @@ while durum:
     # slimein büyüyüp küçülmesi
     if 40 > para_Sayisi >= 30:
         if v == 0:
-            Hiz=5
-            eksi_hiz_y = 10
-            eksi_hiz_x = 10
-            ieksi_hiz_y = 10
-            ieksi_hiz_x = 10
+            taban_hiz=4
+            eksi_hiz_y = 8
+            eksi_hiz_x = 8
+            ieksi_hiz_y = 8
+            ieksi_hiz_x = 8
             v = 1
     if 30 > para_Sayisi >= 20:
         slime = slime_buyuk
+        taban_hiz = 5
         if v == 1:
-            eksi_hiz_y = 7
-            eksi_hiz_x = 7
-            ieksi_hiz_y = 7
-            ieksi_hiz_x = 7
+
+            eksi_hiz_y = 6.5
+            eksi_hiz_x = 6.5
+            ieksi_hiz_y = 6.5
+            ieksi_hiz_x = 6.5
             v = 0
         if _ == 0:
             slime_buyuk_kordi.x = slime_orta_kordi.x
             slime_buyuk_kordi.y = slime_orta_kordi.y
             slime_kordinat = slime_buyuk_kordi
             _ = +1
-            Hiz = 6
-            eksi_hiz_y = 7
-            eksi_hiz_x = 7
-            ieksi_hiz_y = 7
-            ieksi_hiz_x = 7
+
+            eksi_hiz_y = 6.5
+            eksi_hiz_x = 6.5
+            ieksi_hiz_y = 6.5
+            ieksi_hiz_x = 6.5
     if 20 > para_Sayisi >= 10:
         slime = slime_orta
         slime_kordinat = slime_orta_kordi
-
+        taban_hiz = 4
         if para_Sayisi >= 18 and _ >= 1:
             slime_orta_kordi.x = slime_buyuk_kordi.x
             slime_orta_kordi.y = slime_buyuk_kordi.y
             _ = 0
             slime_kordinat = slime_orta_kordi
-            Hiz=4
+
             eksi_hiz_y = 5
             eksi_hiz_x = 5
             ieksi_hiz_y = 5
@@ -280,7 +340,7 @@ while durum:
             slime_orta_kordi.y = slime_kucuk_kordinat.y
             l = 0
             slime_kordinat = slime_orta_kordi
-            Hiz=4
+
             eksi_hiz_y = 5
             eksi_hiz_x = 5
             ieksi_hiz_y = 5
@@ -296,6 +356,11 @@ while durum:
             Hiz = 3
             eksi_hiz_y = 3
             eksi_hiz_x = 3
+
+    if hizlanma:
+        Hiz=taban_hiz+6
+    if not hizlanma:
+        Hiz=taban_hiz
 
     # bitiş ekranı
     if para_Sayisi < 0 or can==0:
@@ -357,9 +422,11 @@ while durum:
                 l = 0
                 can=3
                 v = 0
+                ceat=True
                 ieksi=0
                 Efekt=0
                 music=0
+                efekt=True
                 don_aktif=False
                 slime_kordinat.center=(300,270)
                 slime_kucuk_kordinat.center=(300,270)
