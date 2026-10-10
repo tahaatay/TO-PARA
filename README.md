@@ -52,5 +52,27 @@ Control the slime with **W, A, S, D**, collect money to increase your score, and
 * Improved Game Over music and sound behavior.
 * Various gameplay and movement adjustments.
 
+
+# TO'PARA v1.3 — Visual Effects & Power-Ups Update
+
+## Visual Effects
+- Planned visual effects for collecting money and interacting with game objects.
+- Improved visual feedback for gameplay events.
+- More visual polish to make gameplay feel more responsive.
+
+##  New Features
+- Added a **Power-Up System**.
+- Added a **Speed Potion** that temporarily increases player movement speed.
+- Added a **Special Coin** worth 5 points.
+- Added a hidden **Cheat Code** that grants extra health.
+
+##  Gameplay Improvements
+- Added new ways to earn points and gain temporary advantages.
+- Improved gameplay variety with additional collectible items.
+- Continued balancing movement speed and difficulty.
+
+##  What's Next?
+Future updates may include additional visual effects, animations, and gameplay improvements.
+
 This project was created as my **first Pygame game** to practice game loops, collision detection, movement, sprites, sounds, and basic game mechanics.
 
